@@ -24,4 +24,6 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 wallpaper-ng = "0.1.1"
 rfd = "0.17.2"
-
+wallcove-client.workspace = true
+wallcove-core.workspace = true
+tokio.workspace = true

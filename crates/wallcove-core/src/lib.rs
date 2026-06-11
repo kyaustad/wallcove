@@ -1,1 +1,5 @@
-pub fn placeholder() {}
+pub mod error;
+pub mod protocol;
+
+pub use error::{Error, Result};
+pub use protocol::{DaemonStatus, Request, Response, DAEMON_TCP_ADDR};
