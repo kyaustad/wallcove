@@ -1,0 +1,10 @@
+[package]
+name = "wallcove-client"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+wallcove-core.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
