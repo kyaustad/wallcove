@@ -1,32 +1,54 @@
 use std::sync::Arc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::{TcpListener, TcpStream};
+use tokio_util::sync::CancellationToken;
 use tracing::{info, warn};
 use wallcove_core::protocol::{Request, Response, DAEMON_TCP_ADDR};
 
 use crate::handlers::handle_request;
+use crate::state::DaemonState;
 
-pub async fn run(started_at: Instant) -> anyhow::Result<()> {
+pub async fn run(started_at: Instant, shutdown: CancellationToken) -> anyhow::Result<()> {
     let listener = TcpListener::bind(DAEMON_TCP_ADDR).await?;
     info!("wallcovedaemon listening on {DAEMON_TCP_ADDR}");
 
-    let started_at = Arc::new(started_at);
+    let state = Arc::new(DaemonState {
+        started_at,
+        shutdown: shutdown.clone(),
+    });
 
     loop {
-        let (stream, addr) = listener.accept().await?;
-        let started_at = Arc::clone(&started_at);
+        tokio::select! {
+            // Prefer shutdown over accepting one more connection
+            biased;
 
-        tokio::spawn(async move {
-            if let Err(err) = handle_connection(stream, *started_at).await {
-                warn!("client {addr} disconnected with error: {err}");
+            _ = shutdown.cancelled() => {
+                info!("shutdown signal received, stopping accept loop");
+                break;
             }
-        });
+
+            accept_result = listener.accept() => {
+                let (stream, addr) = accept_result?;
+                let state = Arc::clone(&state);
+
+                tokio::spawn(async move {
+                    if let Err(err) = handle_connection(stream, state).await {
+                        warn!("client {addr} disconnected with error: {err}");
+                    }
+                });
+            }
+        }
     }
+
+    // Brief grace: let in-flight connection handlers finish writing responses
+    tokio::time::sleep(Duration::from_millis(250)).await;
+    info!("wallcovedaemon stopped");
+    Ok(())
 }
 
-async fn handle_connection(stream: TcpStream, started_at: Instant) -> anyhow::Result<()> {
+async fn handle_connection(stream: TcpStream, state: Arc<DaemonState>) -> anyhow::Result<()> {
     let (reader, mut writer) = stream.into_split();
     let mut lines = BufReader::new(reader).lines();
 
@@ -36,7 +58,7 @@ async fn handle_connection(stream: TcpStream, started_at: Instant) -> anyhow::Re
         }
 
         let response = match serde_json::from_str::<Request>(&line) {
-            Ok(req) => handle_request(req, started_at),
+            Ok(req) => handle_request(req, &state),
             Err(err) => Response::failure(format!("invalid request: {err}")),
         };
 

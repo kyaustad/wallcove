@@ -60,4 +60,8 @@ impl DaemonClient {
     pub async fn status(&mut self) -> Result<DaemonStatus> {
         self.call(Request::Status).await
     }
+
+    pub async fn shutdown(&mut self) -> Result<String> {
+        self.call(Request::Shutdown).await
+    }
 }

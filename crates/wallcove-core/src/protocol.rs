@@ -8,6 +8,7 @@ pub const DAEMON_TCP_ADDR: &str = "127.0.0.1:42069";
 pub enum Request {
     HelloWorld,
     Status,
+    Shutdown,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

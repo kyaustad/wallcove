@@ -15,3 +15,4 @@ serde_json.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 anyhow = "1.0.102"
+tokio-util.workspace = true

@@ -1,6 +1,6 @@
 mod daemon;
 mod wallpapers;
-pub use daemon::{daemon_hello_world, daemon_status};
+pub use daemon::{daemon_hello_world, daemon_shutdown, daemon_status};
 pub use wallpapers::set_static_image_wallpaper_from_path;
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -17,6 +17,7 @@ pub fn run() {
             greet,
             daemon_hello_world,
             daemon_status,
+            daemon_shutdown,
             set_static_image_wallpaper_from_path
         ])
         .run(tauri::generate_context!())

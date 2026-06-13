@@ -41,7 +41,7 @@ function App() {
         {daemonError && <p className="text-destructive">{daemonError}</p>}
       </div>
 
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <Button
           onClick={() =>
             invoke("set_static_image_wallpaper_from_path", {
@@ -59,6 +59,12 @@ function App() {
           }
         >
           Blue
+        </Button>
+      </div> */}
+
+      <div className="flex flex-col items-center gap-2">
+        <Button onClick={() => invoke("daemon_shutdown")}>
+          Shutdown Daemon
         </Button>
       </div>
     </main>
