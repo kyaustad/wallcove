@@ -9,6 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 wallcove-core.workspace = true
+wallcove-engine.workspace = true
 tokio.workspace = true
 serde.workspace = true
 serde_json.workspace = true

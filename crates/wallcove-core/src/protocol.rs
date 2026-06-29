@@ -9,6 +9,10 @@ pub enum Request {
     HelloWorld,
     Status,
     Shutdown,
+    SetStaticWallpaper { path: String },
+    SetVideoWallpaper { path: String },
+    ClearWallpaper,
+    GetActiveWallpaper,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

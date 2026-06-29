@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/wallcove-core",
     "crates/wallcove-client",
+    "crates/wallcove-engine",
     "crates/wallcovedaemon",
     "src-tauri",
 ]
@@ -23,3 +24,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tokio-util = { version = "0.7.18", features = ["rt"] }
 wallcove-core = { path = "crates/wallcove-core" }
 wallcove-client = { path = "crates/wallcove-client" }
+wallcove-engine = { path = "crates/wallcove-engine" }

@@ -7,17 +7,14 @@ use tokio_util::sync::CancellationToken;
 use tracing::{info, warn};
 use wallcove_core::protocol::{Request, Response, DAEMON_TCP_ADDR};
 
-use crate::handlers::handle_request;
+use crate::handlers::{handle_request, shutdown_engine};
 use crate::state::DaemonState;
 
 pub async fn run(started_at: Instant, shutdown: CancellationToken) -> anyhow::Result<()> {
     let listener = TcpListener::bind(DAEMON_TCP_ADDR).await?;
     info!("wallcovedaemon listening on {DAEMON_TCP_ADDR}");
 
-    let state = Arc::new(DaemonState {
-        started_at,
-        shutdown: shutdown.clone(),
-    });
+    let state = Arc::new(DaemonState::new(started_at, shutdown.clone()));
 
     loop {
         tokio::select! {
@@ -44,6 +41,7 @@ pub async fn run(started_at: Instant, shutdown: CancellationToken) -> anyhow::Re
 
     // Brief grace: let in-flight connection handlers finish writing responses
     tokio::time::sleep(Duration::from_millis(250)).await;
+    shutdown_engine(&state);
     info!("wallcovedaemon stopped");
     Ok(())
 }

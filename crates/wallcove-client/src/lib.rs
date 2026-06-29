@@ -1,7 +1,7 @@
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tokio::net::TcpStream;
 use wallcove_core::protocol::{DaemonStatus, Request, Response, DAEMON_TCP_ADDR};
-use wallcove_core::{Error, Result};
+use wallcove_core::{ActiveWallpaper, Error, Result, WallpaperApplied};
 
 pub struct DaemonClient {
     reader: BufReader<tokio::net::tcp::OwnedReadHalf>,
@@ -63,5 +63,21 @@ impl DaemonClient {
 
     pub async fn shutdown(&mut self) -> Result<String> {
         self.call(Request::Shutdown).await
+    }
+
+    pub async fn set_static_wallpaper(&mut self, path: String) -> Result<WallpaperApplied> {
+        self.call(Request::SetStaticWallpaper { path }).await
+    }
+
+    pub async fn set_video_wallpaper(&mut self, path: String) -> Result<WallpaperApplied> {
+        self.call(Request::SetVideoWallpaper { path }).await
+    }
+
+    pub async fn clear_wallpaper(&mut self) -> Result<ActiveWallpaper> {
+        self.call(Request::ClearWallpaper).await
+    }
+
+    pub async fn get_active_wallpaper(&mut self) -> Result<ActiveWallpaper> {
+        self.call(Request::GetActiveWallpaper).await
     }
 }
