@@ -32,8 +32,8 @@ export default defineConfig(async () => ({
         }
       : undefined,
     watch: {
-      // 3. tell Vite to ignore watching `src-tauri`
-      ignored: ["**/src-tauri/**, **/crates/**, **/target/**"],
+      // Cargo workspace builds into repo-root `target/`; watching it causes EBUSY on Windows.
+      ignored: ["**/src-tauri/**", "**/target/**", "**/crates/**"],
     },
   },
 }));

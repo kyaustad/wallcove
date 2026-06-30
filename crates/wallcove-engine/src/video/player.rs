@@ -37,34 +37,34 @@ impl VideoPlayer {
     pub fn start(&mut self, path: &Path) -> Result<()> {
         self.stop();
 
-        let (shutdown_tx, shutdown_rx) = mpsc::channel();
-        let (ready_tx, ready_rx) = mpsc::sync_channel(1);
-        let stop_flag = Arc::new(AtomicBool::new(false));
-
-        #[cfg(target_os = "linux")]
-        let video_thread = linux::start(path, shutdown_rx, ready_tx)?;
-
         #[cfg(not(target_os = "linux"))]
-        let video_thread = {
-            let _ = (path, shutdown_rx, ready_tx);
+        {
+            let _ = path;
             return Err(Error::Video(
                 "native video wallpapers are not yet implemented on this platform".into(),
             ));
-        };
+        }
 
         #[cfg(target_os = "linux")]
-        linux::wait_for_ready(ready_rx)?;
+        {
+            let (shutdown_tx, shutdown_rx) = mpsc::channel();
+            let (ready_tx, ready_rx) = mpsc::sync_channel(1);
+            let stop_flag = Arc::new(AtomicBool::new(false));
 
-        info!(path = %path.display(), "native video wallpaper running");
+            let video_thread = linux::start(path, shutdown_rx, ready_tx)?;
+            linux::wait_for_ready(ready_rx)?;
 
-        self.session = Some(VideoSession {
-            shutdown_tx,
-            stop_flag,
-            exited_rx: video_thread.exited_rx,
-            thread: Some(video_thread.thread),
-        });
+            info!(path = %path.display(), "native video wallpaper running");
 
-        Ok(())
+            self.session = Some(VideoSession {
+                shutdown_tx,
+                stop_flag,
+                exited_rx: video_thread.exited_rx,
+                thread: Some(video_thread.thread),
+            });
+
+            Ok(())
+        }
     }
 
     pub fn stop(&mut self) {

@@ -6,7 +6,10 @@ mod windows;
 
 use std::path::Path;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
+
+#[cfg(not(any(target_os = "linux", target_os = "windows")))]
+use crate::error::Error;
 
 pub fn set_static_image(path: &Path) -> Result<()> {
     #[cfg(target_os = "linux")]

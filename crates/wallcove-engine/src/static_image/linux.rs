@@ -17,10 +17,14 @@ pub fn set_static_image(path: &Path) -> Result<()> {
         }
     }
 
-    match wallpaper_ng::set_from_path(path.display().to_string()) {
+    let path_str = path
+        .to_str()
+        .ok_or_else(|| Error::Static("invalid path".into()))?;
+
+    match wallpaper::set_from_path(path_str) {
         Ok(()) => return Ok(()),
         Err(err) => {
-            debug!(%err, desktop = %desktop, "wallpaper-ng failed, trying fallbacks");
+            debug!(%err, desktop = %desktop, "wallpaper failed, trying fallbacks");
         }
     }
 
